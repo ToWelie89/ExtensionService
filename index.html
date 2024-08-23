@@ -1,0 +1,58 @@
+<html>
+  <head>
+    <title>Hej</title>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        async function getFileFromUrl(url, name, defaultType = 'image/jpeg'){
+            const response = await fetch(url);
+            const data = await response.blob();
+            return new File([data], name, {
+                type: data.type || defaultType,
+            });
+        }
+
+        // `await` can only be used in an async body, but showing it here for simplicity.
+        getFileFromUrl('https://martinsonesson.se/testpdf.pdf', 'testpdf.pdf').then(file => {
+            console.log(file);
+            let formData = new FormData();
+            formData.append("myfile", file);
+            fetch("http://localhost:4000/upload_files", {
+                method: "POST",
+                body: formData,
+            }).then(res => res.text()).then(res => {
+                console.log(res);
+                document.getElementById('result').innerText = res;
+            })
+        })
+
+        document.getElementById("myfile").onchange = function () {
+          let input = this.files[0];
+          let formData = new FormData();
+          console.log(input)
+
+          formData.append("myfile", input);
+          fetch("http://localhost:4000/upload_files", {
+            method: "POST",
+            body: formData,
+          }).then(res => res.text()).then(res => {
+            console.log(res);
+            document.getElementById('result').innerText = res;
+          })
+        };
+      });
+    </script>
+  </head>
+  <body>
+    <h1>Test!</h1>
+    <p>
+      <input
+        type="file"
+        id="myfile"
+        name="myfile"
+        value="Open PDF"
+        accept="application/pdf"
+      />
+      <p id="result"></p>
+    </p>
+  </body>
+</html>
