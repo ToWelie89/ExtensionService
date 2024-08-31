@@ -17,7 +17,7 @@
           console.log(input)
 
           formData.append("mypdf", input);
-          fetch("http://127.0.0.1:4000/upload_pdf", {
+          fetch("https://extensionhelperservice-bfb10576355d.herokuapp.com/upload_pdf", {
             method: "POST",
             body: formData,
           }).then(res => res.text()).then(res => {
@@ -32,7 +32,7 @@
           console.log(input)
 
           formData.append("mypic", input);
-          fetch("http://127.0.0.1:4000/upload_pic", {
+          fetch("https://extensionhelperservice-bfb10576355d.herokuapp.com/upload_pic", {
             method: "POST",
             body: formData,
           }).then(res => res.text()).then(res => {
