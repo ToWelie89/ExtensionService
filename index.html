@@ -11,20 +11,6 @@
             });
         }
 
-        // `await` can only be used in an async body, but showing it here for simplicity.
-        /* getFileFromUrl('https://martinsonesson.se/testpdf.pdf', 'testpdf.pdf').then(file => {
-            console.log(file);
-            let formData = new FormData();
-            formData.append("mypdf", file);
-            fetch("http://127.0.0.1:4000/upload_files", {
-                method: "POST",
-                body: formData,
-            }).then(res => res.text()).then(res => {
-                console.log(res);
-                document.getElementById('result_pdf').innerText = res;
-            })
-        }) */
-
         document.getElementById("mypdf").onchange = function () {
           let input = this.files[0];
           let formData = new FormData();
@@ -58,7 +44,10 @@
     </script>
   </head>
   <body>
-    <h1>Test!</h1>
+    <h1>Extension Service</h1>
+    <h3>
+      Upload PDF
+    </h3>
     <p>
       <input
         type="file"
@@ -69,6 +58,9 @@
       />
       <p id="result_pdf"></p>
     </p>
+    <h3>
+      Upload image file
+    </h3>
     <p>
       <input
         type="file"
