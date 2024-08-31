@@ -12,31 +12,46 @@
         }
 
         // `await` can only be used in an async body, but showing it here for simplicity.
-        getFileFromUrl('https://martinsonesson.se/testpdf.pdf', 'testpdf.pdf').then(file => {
+        /* getFileFromUrl('https://martinsonesson.se/testpdf.pdf', 'testpdf.pdf').then(file => {
             console.log(file);
             let formData = new FormData();
-            formData.append("myfile", file);
-            fetch("http://localhost:4000/upload_files", {
+            formData.append("mypdf", file);
+            fetch("http://127.0.0.1:4000/upload_files", {
                 method: "POST",
                 body: formData,
             }).then(res => res.text()).then(res => {
                 console.log(res);
-                document.getElementById('result').innerText = res;
+                document.getElementById('result_pdf').innerText = res;
             })
-        })
+        }) */
 
-        document.getElementById("myfile").onchange = function () {
+        document.getElementById("mypdf").onchange = function () {
           let input = this.files[0];
           let formData = new FormData();
           console.log(input)
 
-          formData.append("myfile", input);
-          fetch("http://localhost:4000/upload_files", {
+          formData.append("mypdf", input);
+          fetch("http://127.0.0.1:4000/upload_pdf", {
             method: "POST",
             body: formData,
           }).then(res => res.text()).then(res => {
             console.log(res);
-            document.getElementById('result').innerText = res;
+            document.getElementById('result_pdf').innerText = res;
+          })
+        };
+
+        document.getElementById("mypic").onchange = function () {
+          let input = this.files[0];
+          let formData = new FormData();
+          console.log(input)
+
+          formData.append("mypic", input);
+          fetch("http://127.0.0.1:4000/upload_pic", {
+            method: "POST",
+            body: formData,
+          }).then(res => res.text()).then(res => {
+            console.log(res);
+            document.getElementById('result_pic').innerText = res;
           })
         };
       });
@@ -47,12 +62,22 @@
     <p>
       <input
         type="file"
-        id="myfile"
-        name="myfile"
+        id="mypdf"
+        name="mypdf"
         value="Open PDF"
         accept="application/pdf"
       />
-      <p id="result"></p>
+      <p id="result_pdf"></p>
+    </p>
+    <p>
+      <input
+        type="file"
+        id="mypic"
+        name="mypic"
+        value="Open image"
+        accept=".jpg,.png"
+      />
+      <p id="result_pic"></p>
     </p>
   </body>
 </html>
