@@ -1,6 +1,9 @@
 const express = require("express");
+const fileUpload = require('express-fileupload');
 const app = express();
 
+app.use(fileUpload());
+app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
@@ -12,87 +15,88 @@ const PDFExtract = require("pdf.js-extract").PDFExtract;
 
 const Tesseract = require("tesseract.js");
 
-/* Tesseract.recognize('./pic.webp', "eng", {
-  logger: (m) => {
-    if (m.status === "recognizing text") {
-      console.log(m.progress);
-    }
-  },
-}).then(({ data: { text } }) => {
+const PORT = process.env.PORT || 4000;
+
+const readTextFromImage = async (source) => {
+  const resp = await Tesseract.recognize(source, "eng", {
+    logger: (m) => {
+      if (m.status === "recognizing text") {
+        console.log(m.progress);
+      }
+    },
+  });
+  
+  const text = resp.data.text;
   console.log('text')
   console.log(text)
-}); */
+  return text;
+}
 
-const PORT = process.env.PORT || 4000;
+const readTextFromPdf = async (pdfBuffer) => new Promise(resolve => {
+  const pdfExtract = new PDFExtract();
+  const options = {};
+
+  pdfExtract.extractBuffer(pdfBuffer, options, async (err, data) => {
+    if (err) return console.log(err);
+    console.log(data);
+
+    let all = "";
+    data.pages.forEach((page) => {
+      page.content.forEach((c) => {
+        if (c.str === "") {
+          all += " ";
+        } else {
+          all += `${c.str} `;
+        }
+      });
+    });
+    console.log(all);
+    resolve(all);
+  });
+})
 
 app.get("/ping", async (req, res) => {
   res.send("pinged!!");
 });
 
-app.post("/upload_files", async (req, res) => {
+app.post("/upload_pdf", async (req, res) => {
   console.log("req.body", req.body);
 
-  let data = [];
-  req.on("data", (chunk) => {
-    data.push(chunk);
-  });
+  const fileData = req.files.mypdf.data;
 
-  req.on("end", () => {
-    let fileData = Buffer.concat(data);
-    console.log("total", fileData);
-
-    const pdfExtract = new PDFExtract();
-    const options = {};
-    pdfExtract.extractBuffer(fileData, options, (err, data) => {
-      if (err) return console.log(err);
-      console.log(data);
-
-      let all = "";
-      data.pages.forEach((page) => {
-        page.content.forEach((c) => {
-          if (c.str === "") {
-            all += " ";
-          } else {
-            all += `${c.str} `;
-          }
-        });
-      });
-      console.log(all);
-      res.send(all);
-    });
-  });
+  const text = await readTextFromPdf(fileData);
+  res.send(text);
 });
 
 app.post("/upload_pic", async (req, res) => {
   console.log("req.body", req.body);
 
-  let data = [];
-  req.on("data", (chunk) => {
-    data.push(chunk);
-  });
+  let fileData = req.files.mypic.data;
+  console.log("total", fileData);
 
-  req.on("end", async () => {
-    let fileData = Buffer.concat(data);
-    console.log("total", fileData);
+  const text = await readTextFromImage(fileData);
+  res.send(text);
+});
 
-    const buffer = await sharp(fileData)
+app.get("/read_pic_by_url", async (req, res) => {
+  console.log("req.body", req.body);
 
-    console.log(buffer)
+  let url = req.body.url;
 
-    buffer.toFile('lol.png')
+  const text = await readTextFromImage(url);
+  res.send(text);
+});
 
-    Tesseract.recognize('lol.png', "eng", {
-      logger: (m) => {
-        if (m.status === "recognizing text") {
-          console.log(m.progress);
-        }
-      },
-    }).then(({ data: { text } }) => {
-      console.log('text')
-      console.log(text)
-      res.send(text)
-    });
-  });
+app.get("/read_pdf_by_url", async (req, res) => {
+  console.log("req.body", req.body);
+
+  let url = req.body.url;
+
+  const pdfRespone = await fetch(url);
+  const pdfBuffer = await pdfRespone.arrayBuffer();
+
+  const text = await readTextFromPdf(pdfBuffer);
+  res.send(text);
 });
 
 app.get("/", (req, res) => {
