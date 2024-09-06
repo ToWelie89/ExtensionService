@@ -2,7 +2,17 @@
   <head>
     <title>Hej</title>
     <script>
+      //const endpointRoot = 'https://extensionhelperservice-bfb10576355d.herokuapp.com';
+      const endpointRoot = 'http://127.0.0.1:4000';
+
       document.addEventListener("DOMContentLoaded", () => {
+        const canvas = document.getElementById("mycanvas");
+        const ctx = canvas.getContext("2d");
+
+        ctx.font = "50px Arial";
+        ctx.fillText("Hello World",10, 60);
+        ctx.fillText("whats up? :)",30, 120);
+
         async function getFileFromUrl(url, name, defaultType = 'image/jpeg'){
             const response = await fetch(url);
             const data = await response.blob();
@@ -17,7 +27,7 @@
           console.log(input)
 
           formData.append("mypdf", input);
-          fetch("https://extensionhelperservice-bfb10576355d.herokuapp.com/upload_pdf", {
+          fetch(`${endpointRoot}/upload_pdf`, {
             method: "POST",
             body: formData,
           }).then(res => res.text()).then(res => {
@@ -32,7 +42,7 @@
           console.log(input)
 
           formData.append("mypic", input);
-          fetch("https://extensionhelperservice-bfb10576355d.herokuapp.com/upload_pic", {
+          fetch(`${endpointRoot}/upload_pic`, {
             method: "POST",
             body: formData,
           }).then(res => res.text()).then(res => {
@@ -40,6 +50,23 @@
             document.getElementById('result_pic').innerText = res;
           })
         };
+
+        document.getElementById("canvasreadbutton").addEventListener('click', (ev) => {
+          const canvas = document.getElementById('mycanvas')
+          const img = canvas.toDataURL('image/png')
+          console.log(img)
+
+          let formData = new FormData();
+          formData.append("mypic", img);
+
+          fetch(`${endpointRoot}/upload_pic_buffer`, {
+            method: "POST",
+            body: formData,
+          }).then(res => res.text()).then(res => {
+            console.log(res);
+            document.getElementById('result_canvas').innerText = res;
+          })
+        });
       });
     </script>
   </head>
@@ -71,5 +98,18 @@
       />
       <p id="result_pic"></p>
     </p>
+    <h3>
+      Canvas
+    </h3>
+    <canvas id="mycanvas" width="300" height="300"></canvas>
+    <div>
+      <input
+        type="button"
+        id="canvasreadbutton"
+        name="canvasreadbutton"
+        value="Read text from canvas"
+      />
+    </div>
+    <p id="result_canvas"></p>
   </body>
 </html>

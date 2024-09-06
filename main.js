@@ -1,11 +1,13 @@
 const express = require("express");
 const fileUpload = require('express-fileupload');
 const app = express();
+const cors = require('cors')
 
 app.use(fileUpload());
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(cors());
 
 const path = require("path");
 const fs = require("fs");
@@ -59,15 +61,9 @@ app.get("/ping", async (req, res) => {
   res.send("pinged!!");
 });
 
-app.post("/upload_pdf", async (req, res) => {
-  console.log("req.body", req.body);
-
-  const fileData = req.files.mypdf.data;
-
-  const text = await readTextFromPdf(fileData);
-  res.send(text);
-});
-
+/**
+ * Read the text form a picture uploaded from a form
+ */
 app.post("/upload_pic", async (req, res) => {
   console.log("req.body", req.body);
 
@@ -78,6 +74,22 @@ app.post("/upload_pic", async (req, res) => {
   res.send(text);
 });
 
+/**
+ * Read the text from a picture as a data buffer (base64)
+ */
+app.post("/upload_pic_buffer", async (req, res) => {
+  console.log("req.body", req.body);
+
+  let fileData = req.body.mypic;
+  console.log("total", fileData);
+
+  const text = await readTextFromImage(fileData);
+  res.send(text);
+});
+
+/**
+ * Get text from a picture by reference URL
+ */
 app.get("/read_pic_by_url", async (req, res) => {
   console.log("req.body", req.body);
 
@@ -87,6 +99,9 @@ app.get("/read_pic_by_url", async (req, res) => {
   res.send(text);
 });
 
+/**
+ * Get the text from a pdf-file by reference URL
+ */
 app.get("/read_pdf_by_url", async (req, res) => {
   console.log("req.body", req.body);
 
@@ -96,6 +111,18 @@ app.get("/read_pdf_by_url", async (req, res) => {
   const pdfBuffer = await pdfRespone.arrayBuffer();
 
   const text = await readTextFromPdf(pdfBuffer);
+  res.send(text);
+});
+
+/**
+ * Read the text form a pdf-file uplodaded from a form
+ */
+app.post("/upload_pdf", async (req, res) => {
+  console.log("req.body", req.body);
+
+  const fileData = req.files.mypdf.data;
+
+  const text = await readTextFromPdf(fileData);
   res.send(text);
 });
 
